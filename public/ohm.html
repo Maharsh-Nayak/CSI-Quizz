@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pointer Pe Charcha 3.0 | CSI</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+      color: #e5e7eb;
+      line-height: 1.6;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .container {
+      display: flex;
+      width: 95vw;
+      max-width: 1400px;
+      height: 90vh;
+      max-height: 800px;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 20px;
+      overflow: hidden;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    }
+
+    /* Left Panel - CSI & Game Info Section */
+    .left-panel {
+      flex: 1.3;
+      background: linear-gradient(135deg, #1e3a8a 0%, #3b0764 100%);
+      padding: 40px;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .left-panel::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><circle cx="50" cy="50" r="2" fill="white" opacity="0.1"/></svg>');
+      opacity: 0.1;
+    }
+
+    /* Top Section: CSI Logo and Title */
+    .csi-header {
+      display: flex;
+      align-items: center;
+      gap: 25px;
+      margin-bottom: 40px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .csi-logo {
+      width: 120px;
+      height: 120px;
+      background: white;
+      border-radius: 15px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+      padding: 15px;
+      border: 3px solid #3b82f6;
+    }
+
+    .csi-logo img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+
+    .csi-text {
+      flex: 1;
+    }
+
+    .csi-text h1 {
+      font-size: 2.5rem;
+      color: white;
+      margin-bottom: 8px;
+      font-weight: 800;
+      text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+    }
+
+    .csi-text p {
+      font-size: 1.3rem;
+      color: #93c5fd;
+      font-weight: 500;
+    }
+
+    /* Middle Section: Game Title */
+    .game-title-section {
+      text-align: center;
+      margin-bottom: 35px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .game-title-main {
+      font-size: 3.2rem;
+      color: #60a5fa;
+      margin-bottom: 10px;
+      font-weight: 900;
+      text-shadow: 0 3px 15px rgba(96, 165, 250, 0.4);
+      letter-spacing: 1px;
+    }
+
+    .game-subtitle {
+      font-size: 1.6rem;
+      color: #93c5fd;
+      font-weight: 600;
+    }
+
+    /* Bottom Section: Quotes and Info */
+    .game-info-section {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      z-index: 1;
+    }
+
+    .quote-section {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 25px;
+      margin-bottom: 30px;
+    }
+
+    .quote {
+      font-style: italic;
+      color: #e5e7eb;
+      padding: 20px;
+      border-left: 4px solid #3b82f6;
+      background: rgba(59, 130, 246, 0.1);
+      border-radius: 12px;
+      font-size: 1.15rem;
+      line-height: 1.7;
+      text-align: left;
+    }
+
+    /* Right Panel - Login Form */
+    .right-panel {
+      flex: 1;
+      padding: 50px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      background: rgba(30, 41, 59, 0.95);
+    }
+
+    .form-container {
+      max-width: 420px;
+      width: 100%;
+      margin: 0 auto;
+    }
+
+    .form-header {
+      text-align: center;
+      margin-bottom: 40px;
+    }
+
+    .form-header h2 {
+      font-size: 2.2rem;
+      color: #60a5fa;
+      margin-bottom: 15px;
+    }
+
+    .form-header p {
+      color: #94a3b8;
+      font-size: 1.1rem;
+    }
+
+    .form-group {
+      margin-bottom: 28px;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 12px;
+      color: #cbd5e1;
+      font-weight: 600;
+      font-size: 1.05rem;
+    }
+
+    .form-group input {
+      width: 100%;
+      padding: 16px;
+      background: rgba(15, 23, 42, 0.7);
+      border: 2px solid #4b5563;
+      border-radius: 12px;
+      color: white;
+      font-size: 16px;
+      transition: all 0.3s;
+    }
+
+    .form-group input:focus {
+      outline: none;
+      border-color: #60a5fa;
+      box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.2);
+    }
+
+    .login-btn {
+      width: 100%;
+      padding: 18px;
+      background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+      color: white;
+      border: none;
+      border-radius: 12px;
+      font-size: 1.2rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.3s;
+      margin-top: 10px;
+      letter-spacing: 0.5px;
+    }
+
+    .login-btn:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 10px 25px rgba(59, 130, 246, 0.4);
+    }
+
+    .guest-btn {
+      width: 100%;
+      padding: 16px;
+      background: rgba(59, 130, 246, 0.15);
+      color: #93c5fd;
+      border: 2px solid rgba(59, 130, 246, 0.3);
+      border-radius: 12px;
+      font-size: 1.1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+      margin-top: 15px;
+    }
+
+    .guest-btn:hover {
+      background: rgba(59, 130, 246, 0.25);
+      transform: translateY(-2px);
+    }
+
+    /* Messages */
+    .message {
+      padding: 16px;
+      border-radius: 10px;
+      margin-bottom: 20px;
+      text-align: center;
+      display: none;
+    }
+
+    .message.success {
+      background: rgba(34, 197, 94, 0.2);
+      border: 2px solid #22c55e;
+      color: #22c55e;
+      display: block;
+    }
+
+    .message.error {
+      background: rgba(239, 68, 68, 0.2);
+      border: 2px solid #ef4444;
+      color: #ef4444;
+      display: block;
+    }
+
+    .spinner {
+      border: 4px solid rgba(255, 255, 255, 0.1);
+      border-radius: 50%;
+      border-top: 4px solid #60a5fa;
+      width: 40px;
+      height: 40px;
+      animation: spin 1s linear infinite;
+      margin: 20px auto;
+      display: none;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    /* Responsive Design */
+    @media (max-width: 1024px) {
+      .container {
+        width: 98vw;
+        height: 95vh;
+      }
+      
+      .left-panel, .right-panel {
+        padding: 30px;
+      }
+      
+      .game-title-main {
+        font-size: 2.8rem;
+      }
+      
+      .csi-text h1 {
+        font-size: 2.2rem;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .container {
+        flex-direction: column;
+        height: auto;
+        max-height: none;
+        width: 95vw;
+        margin: 20px 0;
+      }
+      
+      .left-panel {
+        padding: 30px;
+        flex: none;
+        height: auto;
+      }
+      
+      .right-panel {
+        padding: 30px 25px;
+        flex: none;
+        height: auto;
+      }
+      
+      .form-container {
+        max-width: 100%;
+      }
+    }
+
+    @media (max-width: 480px) {
+      body {
+        padding: 10px;
+      }
+      
+      .left-panel, .right-panel {
+        padding: 25px 20px;
+      }
+      
+      .game-title-main {
+        font-size: 2.2rem;
+      }
+      
+      .csi-text h1 {
+        font-size: 1.8rem;
+      }
+      
+      .csi-logo {
+        width: 90px;
+        height: 90px;
+      }
+      
+      .csi-header {
+        flex-direction: column;
+        text-align: center;
+        gap: 15px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Left Panel: CSI & Game Info Section -->
+    <div class="left-panel">
+      <!-- Section 1: CSI Header -->
+      <div class="csi-header">
+        <div class="csi-logo">
+          <img src="./public/logo.jpeg" alt="CSI Logo" onerror="this.onerror=null; this.style.display='none'; this.parentElement.innerHTML='<span style=\'font-size: 2rem; color: #1e3a8a; font-weight: bold;\'>CSI</span>';">
+        </div>
+        <div class="csi-text">
+          <h1>COMPUTER SOCIETY OF INDIA</h1>
+        </div>
+      </div>
+      
+      <!-- Section 2: Game Title -->
+      <div class="game-title-section">
+        <h2 class="game-title-main">Pointer's Pe Charcha 3.0</h2>
+        <p class="game-subtitle">An Interactive C Pointer Learning Game</p>
+      </div>
+      
+      <!-- Section 3: Quotes and Info -->
+      <div class="game-info-section">
+        <div class="quote-section">
+          <div class="quote">
+            Pointers are the heart of C programming, Master them, and you unlock the true power of memory management, efficient coding, and system-level programming.
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Right Panel: Login Form -->
+    <div class="right-panel">
+      <div class="form-container">
+        <div class="form-header">
+          <h2>Login To Play</h2>
+          <p>Register now to start your pointer learning journey</p>
+        </div>
+        
+        <div id="message" class="message"></div>
+        <div id="spinner" class="spinner"></div>
+        
+        <form id="loginForm" method="POST" action="/join">
+          <div class="form-group">
+            <label for="name">USERNAME</label>
+            <input type="text" id="name" name="name" placeholder="op" />
+          </div>
+          
+          <div class="form-group">
+            <label for="email">COLLEGE EMAIL ID</label>
+            <input type="email" id="email" name="email" placeholder="24li.uos105@ddu.ac.in" />
+          </div>
+          
+          <button type="submit" class="login-btn">START GAME NOW</button>
+          <button type="button" class="guest-btn" onclick="playAsGuest()">TRY AS GUEST</button>
+        </form>
+        
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Play as guest
+    function playAsGuest() {
+      const name = document.getElementById('name').value || 'Guest Player';
+      const email = document.getElementById('email').value || 'guest@play.com';
+      
+      localStorage.setItem('pointerGridUser', JSON.stringify({
+        name: name,
+        email: email,
+        isGuest: true
+      }));
+      
+      window.location.href = `/game?name=${encodeURIComponent(name)}&email=${encodeURIComponent(email)}&guest=true`;
+    }
+    
+    // Show message
+    function showMessage(text, type = 'error') {
+      const msgEl = document.getElementById('message');
+      msgEl.textContent = text;
+      msgEl.className = `message ${type}`;
+      msgEl.style.display = 'block';
+      
+      // Auto hide after 5 seconds
+      setTimeout(() => {
+        msgEl.style.display = 'none';
+      }, 5000);
+    }
+    
+    // Show/hide spinner
+    function setLoading(loading) {
+      document.getElementById('spinner').style.display = loading ? 'block' : 'none';
+    }
+    
+    // Load saved user data
+    document.addEventListener('DOMContentLoaded', function() {
+      const savedUser = localStorage.getItem('pointerGridUser');
+      if(savedUser) {
+        try {
+          const userData = JSON.parse(savedUser);
+          if(userData.name) document.getElementById('name').value = userData.name;
+          if(userData.email) document.getElementById('email').value = userData.email;
+        } catch(e) {
+          console.log('No valid user data found');
+        }
+      }
+    });
+    
+    // Handle form submission
+    document.getElementById('loginForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      
+      const name = document.getElementById('name').value.trim();
+      const email = document.getElementById('email').value.trim();
+      
+      // Basic validation
+      if(!name || !email) {
+        showMessage('Please fill in all fields', 'error');
+        return;
+      }
+      
+      // Email validation
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      
+      if(!emailRegex.test(email)) {
+        showMessage('Please enter a valid email address', 'error');
+        return;
+      }
+      
+      setLoading(true);
+      
+      try {
+        // Store user data
+        localStorage.setItem('pointerGridUser', JSON.stringify({
+          name: name,
+          email: email,
+          isGuest: false
+        }));
+        
+        // Submit to backend
+        const response = await fetch('/join', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ 
+            name: name, 
+            email: email
+          })
+        });
+        
+        if (response.redirected) {
+          window.location.href = response.url;
+        } else {
+          const data = await response.json();
+          if (data.success) {
+            window.location.href = `/game?name=${encodeURIComponent(name)}&email=${encodeURIComponent(email)}`;
+          } else {
+            showMessage(data.error || 'Registration failed', 'error');
+          }
+        }
+      } catch (error) {
+        console.error('Login error:', error);
+        showMessage('Login error. Please try again.', 'error');
+      } finally {
+        setLoading(false);
+      }
+    });
+  </script>
+</body>
+</html>

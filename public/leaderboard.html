@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Pointer Grid Race - Leaderboard | CSI</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #0f172a;
+      min-height: 100vh;
+      color: #e5e7eb;
+      padding: 20px;
+    }
+
+    .container {
+      width: 98vw;
+      max-width: 1400px;
+      margin: 0 auto;
+      background: #1e293b;
+      border-radius: 10px;
+      min-height: 90vh;
+    }
+
+    /* Header Section */
+    .header-section {
+      background: #1e3a8a;
+      padding: 30px 40px;
+      border-bottom: 3px solid #3b82f6;
+    }
+
+    .header-content {
+      display: flex;
+      align-items: center;
+      gap: 25px;
+      margin-bottom: 20px;
+    }
+
+    .csi-logo {
+      width: 100px;
+      height: 100px;
+      background: white;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 10px;
+      border: 2px solid #3b82f6;
+    }
+
+    .csi-logo img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+
+    .csi-text h1 {
+      font-size: 2.2rem;
+      color: white;
+      margin-bottom: 5px;
+      font-weight: 700;
+    }
+
+    .csi-text p {
+      font-size: 1.2rem;
+      color: #93c5fd;
+    }
+
+    .game-title-section {
+      text-align: center;
+    }
+
+    .game-title {
+      font-size: 2.5rem;
+      color: #60a5fa;
+      margin-bottom: 10px;
+      font-weight: 800;
+    }
+
+    .subtitle {
+      font-size: 1.1rem;
+      color: #94a3b8;
+    }
+
+    /* Main Content Section */
+    .content-section {
+      padding: 30px 40px;
+    }
+
+    /* Player Info */
+    .player-info {
+      background: #334155;
+      padding: 20px;
+      border-radius: 8px;
+      text-align: center;
+      font-size: 1.2rem;
+      margin-bottom: 30px;
+      border: 1px solid #475569;
+    }
+
+    .player-info span {
+      color: #fbbf24;
+      font-weight: bold;
+    }
+
+    /* Stats Summary */
+    .stats-summary {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+      margin-bottom: 30px;
+    }
+
+    .stat-card {
+      background: #334155;
+      padding: 25px;
+      border-radius: 8px;
+      text-align: center;
+      border: 1px solid #475569;
+    }
+
+    .stat-card h3 {
+      font-size: 1rem;
+      margin-bottom: 15px;
+      color: #cbd5e1;
+    }
+
+    .stat-card .value {
+      font-size: 2.5rem;
+      font-weight: bold;
+      color: #60a5fa;
+    }
+
+    /* Leaderboard Table */
+    .leaderboard-container {
+      background: #334155;
+      border-radius: 8px;
+      padding: 25px;
+      border: 1px solid #475569;
+    }
+
+    .table-header {
+      margin-bottom: 20px;
+      padding-bottom: 15px;
+      border-bottom: 2px solid #3b82f6;
+    }
+
+    .table-header h3 {
+      font-size: 1.5rem;
+      color: #fbbf24;
+      font-weight: 700;
+    }
+
+    /* Leaderboard Table */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 1.1rem;
+    }
+
+    thead {
+      background: #475569;
+    }
+
+    th {
+      padding: 18px 15px;
+      text-align: left;
+      font-weight: 600;
+      color: #fbbf24;
+      border-bottom: 2px solid #3b82f6;
+    }
+
+    td {
+      padding: 18px 15px;
+      border-bottom: 1px solid #475569;
+    }
+
+    tr:hover {
+      background: #475569;
+    }
+
+    .rank-cell {
+      font-weight: bold;
+      width: 100px;
+      text-align: center;
+    }
+
+    .player-cell {
+      font-weight: 500;
+    }
+
+    .score-cell {
+      font-weight: bold;
+      color: #10b981;
+      text-align: right;
+      width: 120px;
+    }
+
+    /* Top 3 styling - simplified */
+    tr:first-child .rank-cell {
+      color: #fbbf24;
+      font-weight: 800;
+    }
+
+    tr:nth-child(2) .rank-cell {
+      color: #94a3b8;
+      font-weight: 700;
+    }
+
+    tr:nth-child(3) .rank-cell {
+      color: #b45309;
+      font-weight: 700;
+    }
+
+    /* Loading and Empty States */
+    .loading-spinner {
+      display: none;
+      text-align: center;
+      padding: 50px;
+    }
+
+    .spinner {
+      width: 50px;
+      height: 50px;
+      border: 4px solid #3b82f6;
+      border-radius: 50%;
+      border-top-color: transparent;
+      animation: spin 1s linear infinite;
+      margin: 0 auto 20px;
+    }
+
+    @keyframes spin {
+      100% { transform: rotate(360deg); }
+    }
+
+    .empty-state {
+      display: none;
+      text-align: center;
+      padding: 50px;
+      color: #94a3b8;
+    }
+
+    .empty-state h3 {
+      font-size: 1.8rem;
+      margin-bottom: 15px;
+      color: #60a5fa;
+    }
+
+    .empty-state p {
+      font-size: 1.1rem;
+      margin-bottom: 20px;
+    }
+
+    /* Footer */
+    .footer {
+      text-align: center;
+      padding: 20px;
+      color: #94a3b8;
+      font-size: 0.9rem;
+      border-top: 1px solid #475569;
+    }
+
+    /* Responsive design */
+    @media (max-width: 992px) {
+      .header-content {
+        flex-direction: column;
+        text-align: center;
+        gap: 15px;
+      }
+      
+      .stats-summary {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media (max-width: 768px) {
+      .container {
+        width: 100%;
+      }
+      
+      .header-section,
+      .content-section {
+        padding: 20px;
+      }
+      
+      .game-title {
+        font-size: 2rem;
+      }
+      
+      .stats-summary {
+        grid-template-columns: 1fr;
+      }
+      
+      th, td {
+        padding: 15px 10px;
+        font-size: 1rem;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .csi-text h1 {
+        font-size: 1.8rem;
+      }
+      
+      .game-title {
+        font-size: 1.8rem;
+      }
+      
+      .csi-logo {
+        width: 80px;
+        height: 80px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Header Section -->
+    <div class="header-section">
+      <div class="header-content">
+        <div class="csi-logo">
+          <img src="./public/logo.jpeg" alt="CSI Logo">
+        </div>
+        <div class="csi-text">
+          <h1>COMPUTER SOCIETY OF INDIA</h1>
+          <p>Leaderboard</p>
+        </div>
+      </div>
+      
+      <div class="game-title-section">
+        <h2 class="game-title">POINTER'S PE CHARCHA 3.0</h2>
+        <p class="subtitle">Top scores from players</p>
+      </div>
+    </div>
+
+    <!-- Main Content Section -->
+    <div class="content-section">
+      <!-- Player Info -->
+      <div class="player-info">
+        Welcome, <span id="currentPlayer">Player</span>
+      </div>
+
+      <!-- Stats Summary -->
+      <div class="stats-summary">
+        <div class="stat-card">
+          <h3>TOTAL PLAYERS</h3>
+          <div class="value" id="totalPlayers">0</div>
+        </div>
+        <div class="stat-card">
+          <h3>HIGHEST SCORE</h3>
+          <div class="value" id="highestScore">0</div>
+        </div>
+        <div class="stat-card">
+          <h3>YOUR RANK</h3>
+          <div class="value" id="yourRank">-</div>
+        </div>
+      </div>
+
+      <!-- Leaderboard Table -->
+      <div class="leaderboard-container">
+        <div class="table-header">
+          <h3>LEADERBOARD</h3>
+        </div>
+
+        <div class="loading-spinner" id="loadingSpinner">
+          <div class="spinner"></div>
+          <p>Loading leaderboard...</p>
+        </div>
+
+        <div class="empty-state" id="emptyState">
+          <h3>NO SCORES YET</h3>
+          <p>Be the first player to submit a score!</p>
+        </div>
+
+        <table id="leaderboardTable" style="display: none;">
+          <thead>
+            <tr>
+              <th class="rank-cell">RANK</th>
+              <th class="player-cell">PLAYER</th>
+              <th class="score-cell">SCORE</th>
+            </tr>
+          </thead>
+          <tbody id="leaderboardBody">
+            <!-- Leaderboard rows will be inserted here by JavaScript -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="footer">
+      <p>Pointer Grid Race © 2024</p>
+    </div>
+  </div>
+
+  <script>
+    let currentUser = null;
+    let leaderboardData = [];
+
+    // DOM Elements
+    const loadingSpinner = document.getElementById('loadingSpinner');
+    const emptyState = document.getElementById('emptyState');
+    const leaderboardTable = document.getElementById('leaderboardTable');
+    const leaderboardBody = document.getElementById('leaderboardBody');
+    const currentPlayerEl = document.getElementById('currentPlayer');
+    const totalPlayersEl = document.getElementById('totalPlayers');
+    const highestScoreEl = document.getElementById('highestScore');
+    const yourRankEl = document.getElementById('yourRank');
+
+    // Get user data
+    function getCurrentUser() {
+      const urlParams = new URLSearchParams(window.location.search);
+      const nameParam = urlParams.get('name');
+      const emailParam = urlParams.get('email');
+      
+      if(nameParam && emailParam) {
+        return {
+          name: decodeURIComponent(nameParam),
+          email: decodeURIComponent(emailParam)
+        };
+      }
+      
+      const savedUser = localStorage.getItem('pointerGridUser');
+      if(savedUser) {
+        try {
+          return JSON.parse(savedUser);
+        } catch(e) {
+          console.log('Error parsing user data');
+        }
+      }
+      
+      return { name: "Guest", email: "" };
+    }
+
+    // Fetch leaderboard
+    async function fetchLeaderboard() {
+      loadingSpinner.style.display = 'block';
+      emptyState.style.display = 'none';
+      leaderboardTable.style.display = 'none';
+
+      try {
+        const response = await fetch('/leaderboard');
+        if (!response.ok) throw new Error('Failed to fetch leaderboard');
+        
+        leaderboardData = await response.json();
+        displayLeaderboard();
+        
+      } catch (error) {
+        console.error('Error:', error);
+        loadingSpinner.style.display = 'none';
+        emptyState.style.display = 'block';
+      }
+    }
+
+    // Display leaderboard
+    function displayLeaderboard() {
+      loadingSpinner.style.display = 'none';
+      
+      if (!leaderboardData || leaderboardData.length === 0) {
+        emptyState.style.display = 'block';
+        return;
+      }
+
+      // Sort by score
+      leaderboardData.sort((a, b) => b.score - a.score);
+
+      // Update stats
+      updateStats();
+
+      // Generate table rows
+      let html = '';
+      let userRank = null;
+
+      leaderboardData.forEach((player, index) => {
+        const rank = index + 1;
+        const isCurrentUser = currentUser && currentUser.email === player.email && currentUser.email !== "";
+
+        if (isCurrentUser) userRank = rank;
+
+        html += `
+          <tr ${isCurrentUser ? 'style="background: #3b82f620;"' : ''}>
+            <td class="rank-cell">${rank}</td>
+            <td class="player-cell">
+              ${player.name}
+              ${isCurrentUser ? ' <span style="color: #3b82f6;">(You)</span>' : ''}
+            </td>
+            <td class="score-cell">${player.score}</td>
+          </tr>
+        `;
+      });
+
+      leaderboardBody.innerHTML = html;
+      leaderboardTable.style.display = 'table';
+      emptyState.style.display = 'none';
+
+      // Update user rank
+      if (userRank) {
+        yourRankEl.textContent = `#${userRank}`;
+      } else if (currentUser && currentUser.email) {
+        yourRankEl.textContent = "Not ranked";
+      } else {
+        yourRankEl.textContent = "-";
+      }
+    }
+
+    // Update statistics
+    function updateStats() {
+      totalPlayersEl.textContent = leaderboardData.length;
+      
+      if (leaderboardData.length > 0) {
+        const scores = leaderboardData.map(p => p.score);
+        highestScoreEl.textContent = Math.max(...scores);
+      } else {
+        highestScoreEl.textContent = "0";
+      }
+    }
+
+    // Initialize page
+    function init() {
+      currentUser = getCurrentUser();
+      currentPlayerEl.textContent = currentUser.name || "Guest";
+      fetchLeaderboard();
+      
+      // Auto-refresh every 30 seconds
+      setInterval(fetchLeaderboard, 30000);
+    }
+
+    // Initialize when page loads
+    document.addEventListener('DOMContentLoaded', init);
+  </script>
+</body>
+</html>

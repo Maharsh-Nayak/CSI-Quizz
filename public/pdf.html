@@ -1,0 +1,682 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pointer's Pe Charcha 3.0</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: white;
+            padding: 25px 40px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .logo-section {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .csi-logo {
+            width: 80px;
+            height: 80px;
+            border-radius: 12px;
+            object-fit: contain;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .title-section h1 {
+            color: #2d3748;
+            font-size: 32px;
+            margin-bottom: 5px;
+            font-weight: 700;
+        }
+
+        .title-section p {
+            color: #718096;
+            font-size: 16px;
+            font-weight: 500;
+        }
+
+        .exam-badge {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            padding: 12px 25px;
+            border-radius: 25px;
+            font-weight: bold;
+            font-size: 14px;
+            box-shadow: 0 4px 15px rgba(245, 87, 108, 0.3);
+        }
+
+        .page {
+            background: white;
+            border-radius: 20px;
+            padding: 50px 40px;
+            margin-bottom: 30px;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.2);
+            position: relative;
+            overflow: hidden;
+            min-height: 1000px;
+        }
+
+        .page::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 8px;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+        }
+
+        .page-number {
+            position: absolute;
+            top: 20px;
+            right: 40px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 20px;
+            box-shadow: 0 4px 10px rgba(102, 126, 234, 0.3);
+        }
+
+        .sticky-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+            margin-top: 30px;
+        }
+
+        .sticky-note {
+            background: linear-gradient(135deg, #fff9e6 0%, #ffe4a3 100%);
+            border-radius: 12px;
+            padding: 18px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            position: relative;
+            border-left: 5px solid #f4a950;
+            color: #2d3748;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .sticky-note:hover {
+            transform: translateY(-5px) rotate(1deg);
+            box-shadow: 0 12px 30px rgba(0,0,0,0.25);
+        }
+
+        .sticky-note.blue {
+            background: linear-gradient(135deg, #e3f2fd 0%, #90caf9 100%);
+            border-left-color: #1976d2;
+            color: #0d47a1;
+        }
+
+        .sticky-note.green {
+            background: linear-gradient(135deg, #e8f5e9 0%, #81c784 100%);
+            border-left-color: #388e3c;
+            color: #1b5e20;
+        }
+
+        .sticky-note.pink {
+            background: linear-gradient(135deg, #fce4ec 0%, #f48fb1 100%);
+            border-left-color: #c2185b;
+            color: #880e4f;
+        }
+
+        .sticky-note.purple {
+            background: linear-gradient(135deg, #f3e5f5 0%, #ce93d8 100%);
+            border-left-color: #7b1fa2;
+            color: #4a148c;
+        }
+
+        .sticky-note.orange {
+            background: linear-gradient(135deg, #fff3e0 0%, #ffb74d 100%);
+            border-left-color: #e65100;
+            color: #bf360c;
+        }
+
+        .sticky-title {
+            font-size: 17px;
+            font-weight: bold;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .sticky-content {
+            font-size: 13px;
+            line-height: 1.7;
+            flex-grow: 1;
+        }
+
+        .code-block {
+            background: rgba(0,0,0,0.08);
+            padding: 10px;
+            border-radius: 6px;
+            font-family: 'Courier New', monospace;
+            margin: 10px 0;
+            font-size: 12px;
+            color: #2d3748;
+            border: 1px solid rgba(0,0,0,0.1);
+            line-height: 1.6;
+        }
+
+        .highlight {
+            background: rgba(255,215,0,0.4);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: bold;
+            color: #2d3748;
+        }
+
+        .warning {
+            background: rgba(255,152,0,0.15);
+            padding: 8px;
+            border-radius: 6px;
+            margin: 8px 0;
+            border-left: 3px solid #ff6f00;
+            color: #e65100;
+            font-weight: 500;
+            font-size: 12px;
+        }
+
+        .check {
+            color: #2e7d32;
+            font-weight: bold;
+        }
+
+        .cross {
+            color: #c62828;
+            font-weight: bold;
+        }
+
+        .emoji {
+            font-size: 18px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 10px 0;
+            font-size: 12px;
+        }
+
+        table th, table td {
+            padding: 6px;
+            border: 1px solid rgba(0,0,0,0.15);
+            text-align: left;
+        }
+
+        table th {
+            background: rgba(0,0,0,0.08);
+            font-weight: bold;
+        }
+
+        .tip-box {
+            background: rgba(255,235,59,0.2);
+            padding: 10px;
+            border-radius: 8px;
+            margin-top: 12px;
+            border-left: 4px solid #f9a825;
+            color: #2d3748;
+            font-size: 12px;
+        }
+
+        .download-btn {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px 30px;
+            border-radius: 50px;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+            transition: all 0.3s ease;
+            border: none;
+            font-size: 16px;
+            z-index: 1000;
+        }
+
+        .download-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 35px rgba(102, 126, 234, 0.6);
+        }
+
+        /* Responsive grid for smaller screens */
+        @media (max-width: 1200px) {
+            .sticky-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+
+        @media (max-width: 900px) {
+            .sticky-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 600px) {
+            .sticky-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <div class="logo-section">
+                <img src="/public/logo.jpeg" alt="CSI Logo" class="csi-logo">
+                <div class="title-section">
+                    <h1>Computer Society of India</h1>
+                    <p>Pointer's Pe Charcha 3.0</p>
+                </div>
+            </div>
+            <div class="exam-badge">🎯 EXAM READY</div>
+        </div>
+
+        <!-- Page 1 -->
+        <div class="page">
+            <div class="page-number">1</div>
+            
+            <div class="sticky-grid">
+                <!-- Sticky 1: Pointer Basics -->
+                <div class="sticky-note">
+                    <div class="sticky-title"><span class="emoji">📍</span> POINTER BASICS</div>
+                    <div class="sticky-content">
+                        <strong>Definition:</strong> Variable storing memory address
+                        <div class="code-block">
+int num = 10;<br><p>
+int *ptr = &num<code>;</code></p>
+                        </div>
+                        <strong>Key Operators:</strong><br>
+                        • <span class="highlight">&</span> → Address-of<br>
+                        • <span class="highlight">*</span> → Dereference<br><br>
+                        <strong>Size:</strong> Same for all types!<br>
+                        <span class="code-block">sizeof(int*) == sizeof(char*)</span>
+                    </div>
+                </div>
+
+                <!-- Sticky 2: Types of Pointers -->
+                <div class="sticky-note blue">
+                    <div class="sticky-title"><span class="emoji">🎭</span> TYPES OF POINTERS</div>
+                    <div class="sticky-content">
+                        <strong>1. Void Pointer:</strong><br>
+                        Can point to any type<br>
+                        <div class="warning">⚠️ Must typecast before use!</div>
+                        <div class="code-block">void *vp = &x;<br>printf("%d", *(int*)vp);</div>
+                        
+                        <strong>2. Wild Pointer:</strong><br>
+                        <span class="cross">❌</span> Uninitialized pointer<br>
+                        <span class="check">✅</span> Fix: <span class="code-block" style="display:inline; padding:2px 6px; margin:0;">int *p = NULL;</span>
+                    </div>
+                </div>
+
+                <!-- Sticky 3: Const Pointers -->
+                <div class="sticky-note pink">
+                    <div class="sticky-title"><span class="emoji">🔒</span> CONST POINTERS</div>
+                    <div class="sticky-content">
+                        <table>
+                            <tr>
+                                <th>Type</th>
+                                <th>Value?</th>
+                                <th>Addr?</th>
+                            </tr>
+                            <tr>
+                                <td>const int *p</td>
+                                <td>❌</td>
+                                <td>✅</td>
+                            </tr>
+                            <tr>
+                                <td>int *const p</td>
+                                <td>✅</td>
+                                <td>❌</td>
+                            </tr>
+                            <tr>
+                                <td>const int *const p</td>
+                                <td>❌</td>
+                                <td>❌</td>
+                            </tr>
+                        </table>
+                        <div class="tip-box">
+                            <strong>Tip:</strong> Read right to left!
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sticky 4: Pointer Arithmetic -->
+                <div class="sticky-note green">
+                    <div class="sticky-title"><span class="emoji">➕</span> POINTER ARITHMETIC</div>
+                    <div class="sticky-content">
+                        <strong>Moves by sizeof(type) bytes</strong><br><br>
+                        <span class="check">✅ VALID:</span><br>
+                        p+2, p-2, p++, --p, p-q<br><br>
+                        <span class="cross">❌ INVALID:</span><br>
+                        p+q, p*2, p/2, p+float<br>
+                        <div class="code-block">
+int a[] = {3,6,9};<br>
+int *p = a;<br>
+*++p → 6  // Pre-inc<br>
+++*p → 4  // Inc value
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sticky 5: Operator Precedence -->
+                <div class="sticky-note purple">
+                    <div class="sticky-title"><span class="emoji">🎯</span> OPERATOR PRECEDENCE</div>
+                    <div class="sticky-content">
+                        <strong>Order (High → Low):</strong><br>
+                        1. <span class="highlight">() [] . -></span><br>
+                        2. <span class="highlight">Postfix ++ --</span><br>
+                        3. <span class="highlight">Prefix ++ -- * &</span><br><br>
+                        <div class="warning">
+                            <strong>EXAM TRAP:</strong><br>
+                            int x = ++*p++;<br>
+                            Step 1: ++(*p)<br>
+                            Step 2: p++
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sticky 6: Chaining Pointers -->
+                <div class="sticky-note orange">
+                    <div class="sticky-title"><span class="emoji">🔗</span> POINTER CHAINING</div>
+                    <div class="sticky-content">
+                        <strong>Multi-level Indirection:</strong>
+                        <div class="code-block">
+int i = 10;<br>
+int *p = &i;<br>
+int **q = &p;<br>
+int ***r = &q;<br><br>
+i == *p == **q == ***r
+                        </div>
+                        <div class="tip-box">
+                            <strong>Remember:</strong> Each * removes one level
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sticky 7: Arrays & Pointers -->
+                <div class="sticky-note">
+                    <div class="sticky-title"><span class="emoji">📊</span> ARRAYS & POINTERS</div>
+                    <div class="sticky-content">
+                        <strong>Key Equivalence:</strong><br>
+                        <span class="code-block" style="display:block;">a[i] ≡ *(a+i) ≡ i[a]</span><br>
+                        <div class="warning">
+                            <strong>MAJOR DIFFERENCE:</strong><br>
+                            int *p = a;<br>
+                            p = p+1; <span class="check">✅</span><br>
+                            a = a+1; <span class="cross">❌</span> ERROR!
+                        </div>
+                        <strong>Array name NOT assignable!</strong>
+                    </div>
+                </div>
+
+                <!-- Sticky 8: Array Address Tricks -->
+                <div class="sticky-note blue">
+                    <div class="sticky-title"><span class="emoji">🎪</span> ADDRESS TRICKS</div>
+                    <div class="sticky-content">
+                        Base = 100, sizeof(int) = 4
+                        <div class="code-block">
+int p[3] = {2,4,6};<br>
+p     → 100  // First elem<br>
+p+1   → 104  // Next elem<br>
+&p+1  → 112  // Skip array!
+                        </div>
+                        <div class="tip-box">
+                            <strong>&p</strong> treats whole array as one unit
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Page 2 -->
+        <div class="page">
+            <div class="page-number">2</div>
+            
+            <div class="sticky-grid">
+                <!-- Sticky 9: Pointer to Array -->
+                <div class="sticky-note pink">
+                    <div class="sticky-title"><span class="emoji">🎯</span> POINTER TO ARRAY</div>
+                    <div class="sticky-content">
+                        <strong>Syntax:</strong>
+                        <div class="code-block">
+int (*p)[5];<br>
+int a[5] = {1,2,3,4,5};<br>
+int (*p)[5] = &a; ✅<br>
+int (*p)[5] = a;  ❌
+                        </div>
+                        <strong>Arithmetic:</strong> Jumps by entire array!<br>
+                        p+1 = p + sizeof(array)<br><br>
+                        <div class="warning">
+                            ⚠️ Parentheses MANDATORY!
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sticky 10: Array of Pointers -->
+                <div class="sticky-note green">
+                    <div class="sticky-title"><span class="emoji">📚</span> ARRAY OF POINTERS</div>
+                    <div class="sticky-content">
+                        <strong>Syntax:</strong>
+                        <div class="code-block">
+int *ptr[3];<br><br>
+char *names[] = {<br>
+  "C", "Java", "Python"<br>
+};<br>
+printf("%s", names[1]);<br>
+// Output: Java
+                        </div>
+                        <strong>Each element is a pointer!</strong>
+                    </div>
+                </div>
+
+                <!-- Sticky 11: Char Arrays vs Pointers -->
+                <div class="sticky-note purple">
+                    <div class="sticky-title"><span class="emoji">🔤</span> CHAR ARRAY vs PTR</div>
+                    <div class="sticky-content">
+                        <table>
+                            <tr>
+                                <th>Feature</th>
+                                <th>char str[]</th>
+                                <th>char *p</th>
+                            </tr>
+                            <tr>
+                                <td>Memory</td>
+                                <td>Stack</td>
+                                <td>Literal</td>
+                            </tr>
+                            <tr>
+                                <td>Modify?</td>
+                                <td>✅ YES</td>
+                                <td>❌ NO</td>
+                            </tr>
+                            <tr>
+                                <td>str++?</td>
+                                <td>❌ NO</td>
+                                <td>✅ YES</td>
+                            </tr>
+                        </table>
+                        <div class="warning">
+                            <strong>TRAP:</strong><br>
+                            char *p = "hello";<br>
+                            p[0] = 'H'; → Undefined!
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sticky 12: Structure Pointers -->
+                <div class="sticky-note orange">
+                    <div class="sticky-title"><span class="emoji">🏗️</span> STRUCTURE POINTERS</div>
+                    <div class="sticky-content">
+                        <strong>Declaration:</strong>
+                        <div class="code-block">
+struct Student {<br>
+  char name[50];<br>
+  int marks;<br>
+};<br><br>
+struct Student s1, *ptr;<br>
+ptr = &s1;
+                        </div>
+                        <strong>Access Members:</strong><br>
+                        • Dot: <span class="highlight">s1.marks</span><br>
+                        • Arrow: <span class="highlight">ptr->marks</span>
+                    </div>
+                </div>
+
+                <!-- Sticky 13: Function Pointers -->
+                <div class="sticky-note">
+                    <div class="sticky-title"><span class="emoji">⚡</span> FUNCTION POINTERS</div>
+                    <div class="sticky-content">
+                        <strong>Syntax:</strong>
+                        <div class="code-block">
+int (*fp)(int, int);<br><br>
+int add(int a, int b) {<br>
+  return a + b;<br>
+}<br><br>
+fp = add;<br>
+result = fp(5, 3);
+                        </div>
+                        <strong>Uses:</strong> Callbacks, Dynamic selection
+                    </div>
+                </div>
+
+                <!-- Sticky 14: File Handling -->
+                <div class="sticky-note blue">
+                    <div class="sticky-title"><span class="emoji">📁</span> FILE HANDLING</div>
+                    <div class="sticky-content">
+                        <strong>File Modes:</strong><br>
+                        • <span class="highlight">r</span> - Read<br>
+                        • <span class="highlight">w</span> - Write (overwrite)<br>
+                        • <span class="highlight">a</span> - Append<br>
+                        • <span class="highlight">r+</span> - Read + Write<br><br>
+                        <strong>Key Functions:</strong>
+                        <div class="code-block">
+FILE *fp = fopen("f.txt","r");<br>
+fprintf(fp, "text");<br>
+fscanf(fp, "%d", &x);<br>
+fclose(fp);
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sticky 15: Common Traps -->
+                <div class="sticky-note pink">
+                    <div class="sticky-title"><span class="emoji">⚠️</span> EXAM TRAPS</div>
+                    <div class="sticky-content">
+                        <strong>Avoid These:</strong><br><br>
+                        <span class="cross">❌</span> int *p; *p=10;<br>
+                        <span style="font-size:11px;">(Wild pointer!)</span><br><br>
+                        <span class="cross">❌</span> void *p; printf(*p);<br>
+                        <span style="font-size:11px;">(Typecast needed!)</span><br><br>
+                        <span class="cross">❌</span> char *p="hi"; p[0]='H';<br>
+                        <span style="font-size:11px;">(Literal immutable!)</span><br><br>
+                        <span class="cross">❌</span> int a[5]; a++;<br>
+                        <span style="font-size:11px;">(Array name fixed!)</span>
+                    </div>
+                </div>
+
+                <!-- Sticky 16: Last Minute Tips -->
+                <div class="sticky-note green">
+                    <div class="sticky-title"><span class="emoji">🚀</span> LAST MINUTE TIPS</div>
+                    <div class="sticky-content">
+                        <strong>Remember:</strong><br><br>
+                        1. Initialize pointers to NULL<br>
+                        2. Postfix > Dereference<br>
+                        3. Array name ≠ Pointer var<br>
+                        4. Typecast void pointers<br>
+                        5. Close files after use<br>
+                        6. Check NULL before deref<br><br>
+                        <div class="tip-box">
+                            <strong>🎯 Practice arithmetic & precedence!</strong>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <button class="download-btn" onclick="downloadAsImages()">📥 Download Images</button>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script>
+        async function downloadAsImages() {
+            const pages = document.querySelectorAll('.page');
+            const header = document.querySelector('.header');
+            
+            for (let i = 0; i < pages.length; i++) {
+                // Create a temporary container for header + page
+                const tempContainer = document.createElement('div');
+                tempContainer.style.background = 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
+                tempContainer.style.padding = '20px';
+                tempContainer.style.width = '1400px';
+                
+                // Clone header and page
+                const headerClone = header.cloneNode(true);
+                const pageClone = pages[i].cloneNode(true);
+                
+                tempContainer.appendChild(headerClone);
+                tempContainer.appendChild(pageClone);
+                document.body.appendChild(tempContainer);
+                
+                // Capture as image
+                const canvas = await html2canvas(tempContainer, {
+                    scale: 2,
+                    backgroundColor: null,
+                    logging: false,
+                    width: 1440,
+                    windowWidth: 1440
+                });
+                
+                // Download
+                const link = document.createElement('a');
+                link.download = `Pointers_Pe_Charcha_3.0_Page_${i + 1}.png`;
+                link.href = canvas.toDataURL('image/png');
+                link.click();
+                
+                // Remove temp container
+                document.body.removeChild(tempContainer);
+                
+                // Wait a bit between downloads
+                await new Promise(resolve => setTimeout(resolve, 500));
+            }
+        }
+    </script>
+</body>
+</html>
