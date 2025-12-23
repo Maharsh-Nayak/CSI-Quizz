@@ -118,8 +118,6 @@
       box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
     }
 
-    /* REMOVED cell-label styling since we're removing the [row][col] indices */
-
     .cell.pointer {
       background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
       border-color: #60a5fa;
@@ -265,7 +263,7 @@
 
     #queueBtn:hover {
       transform: translateY(-3px);
-      box-shadow: 0 10px 25px rgba(59, 130, 246, 0.4);
+      box-shadow : 0 10px 25px rgba(59, 130, 246, 0.4);
     }
 
     .secondary {
@@ -525,6 +523,9 @@
       <h3>Player: <span id="playerName">Guest</span></h3>
       <p>🎯 +50 points for each target reached</p>
       <p>💥 -10 points for each segmentation fault</p>
+      <p>🏃 Move 1 step in any direction</p>
+      <p>🦘 Jump multiple steps in same row or column (from current position)</p>
+      <p>📍 Coordinates shown are relative to base address</p>
       <p style="color: #fbbf24; margin-top: 15px; font-weight: bold;">Base address updates to current cell when target is reached!</p>
     </div>
   </div>
@@ -546,7 +547,7 @@
       <!-- Code Input -->
       <div class="control-box">
         <label for="codeInput"><strong>Enter C Pointer Expression (relative to base):</strong></label>
-        <input id="codeInput" placeholder="Example: *(*(ptr+2)+3)" value="*(*(ptr+0)+1)" />
+        <input id="codeInput" placeholder="Example: *(*(ptr+1)+0)" value="*(*(ptr+0)+1)" />
         <div style="display: flex; gap: 10px; margin-top: 15px;">
           <button id="queueBtn" onclick="queueMove()">Queue Instruction</button>
           <button id="executeBtn" onclick="executeQueue()" class="secondary">Run Program</button>
@@ -560,15 +561,19 @@
         <div id="queueItems">Queue is empty</div>
       </div>
       
-      <!-- Examples - Updated with all four combinations -->
+      <!-- Examples - Both 1-step moves and jumps -->
       <h3>Example Expressions (relative to base)</h3>
       <ul class="example-list">
-        <li onclick="setExample('*(*(ptr+1)+0)')">Down 1: *(*(ptr+1)+0)</li>
-        <li onclick="setExample('*(*(ptr+0)-1)')">Left 1: *(*(ptr+0)-1)</li>
-        <li onclick="setExample('*(*(ptr-1)+0)')">Up 1: *(*(ptr-1)+0)</li>
-        <li onclick="setExample('*(*(ptr-1)-1)')">Up 1, Left 1: *(*(ptr-1)-1)</li>
-        <li onclick="setExample('*(*(ptr+2)-1)')">Down 2, Left 1: *(*(ptr+2)-1)</li>
-        <li onclick="setExample('*(*(ptr-2)+3)')">Up 2, Right 3: *(*(ptr-2)+3)</li>
+        <li onclick="setExample('*(*(ptr+1)+0)')">Down 1 (move): *(*(ptr+1)+0)</li>
+        <li onclick="setExample('*(*(ptr+0)-1)')">Left 1 (move): *(*(ptr+0)-1)</li>
+        <li onclick="setExample('*(*(ptr-1)+0)')">Up 1 (move): *(*(ptr-1)+0)</li>
+        <li onclick="setExample('*(*(ptr+0)+1)')">Right 1 (move): *(*(ptr+0)+1)</li>
+        <li onclick="setExample('*(*(ptr+1)-1)')">Down-Left diagonal: *(*(ptr+1)-1)</li>
+        <li onclick="setExample('*(*(ptr-1)+1)')">Up-Right diagonal: *(*(ptr-1)+1)</li>
+        <li onclick="setExample('*(*(ptr+2)+0)')">Down 2 (jump): *(*(ptr+2)+0)</li>
+        <li onclick="setExample('*(*(ptr+0)+2)')">Right 2 (jump): *(*(ptr+0)+2)</li>
+        <li onclick="setExample('*(*(ptr-2)+0)')">Up 2 (jump): *(*(ptr-2)+0)</li>
+        <li onclick="setExample('*(*(ptr+0)-2)')">Left 2 (jump): *(*(ptr+0)-2)</li>
       </ul>
       
       <!-- Info Message -->
@@ -748,19 +753,121 @@
     }
     
     let html = '';
+    // Calculate cumulative position for each instruction
+    let cumulativeRow = baseRow;
+    let cumulativeCol = baseCol;
+    
     instructionQueue.forEach((inst, index) => {
+      // Show absolute coordinates (relative to base)
       const absRow = baseRow + inst.dx;
       const absCol = baseCol + inst.dy;
+      
       html += `
         <div class="queue-item">
           <div>${index + 1}. ${inst.expression}</div>
           <div class="position">→ arr[${absRow}][${absCol}]</div>
         </div>
       `;
+      
+      // Update cumulative position for next instruction (only for validation)
+      cumulativeRow += inst.dx;
+      cumulativeCol += inst.dy;
     });
     queueItemsEl.innerHTML = html;
   }
 
+  // Check if there's any cross cell in between two positions in same row or column
+  function hasCrossInBetween(startRow, startCol, endRow, endCol) {
+    // Check same row
+    if (startRow === endRow) {
+      const minCol = Math.min(startCol, endCol);
+      const maxCol = Math.max(startCol, endCol);
+      
+      // Check all cells between start and end (excluding start and end)
+      for (let c = minCol + 1; c < maxCol; c++) {
+        if (isCross(startRow, c)) {
+          return true;
+        }
+      }
+    }
+    
+    // Check same column
+    if (startCol === endCol) {
+      const minRow = Math.min(startRow, endRow);
+      const maxRow = Math.max(startRow, endRow);
+      
+      // Check all cells between start and end (excluding start and end)
+      for (let r = minRow + 1; r < maxRow; r++) {
+        if (isCross(r, startCol)) {
+          return true;
+        }
+      }
+    }
+    
+    return false;
+  }
+
+  // Check if a move/jump is valid from a given start position
+function isValidMoveFrom(startRow, startCol, dx, dy, isTargetCell = false) {
+  const newRow = startRow + dx;
+  const newCol = startCol + dy;
+  
+  // Check bounds
+  if (newRow < 0 || newRow >= SIZE || newCol < 0 || newCol >= SIZE) {
+    return false;
+  }
+  
+  // Check if landing on cross
+  if (isCross(newRow, newCol)) {
+    return false;
+  }
+  
+  // Check if it's a 1-step move (dx and dy are -1, 0, or 1)
+  const isOneStepMove = Math.abs(dx) <= 1 && Math.abs(dy) <= 1;
+  
+  if (isOneStepMove) {
+    // 1-step moves are always allowed (including diagonal)
+    return true;
+  } else {
+    // It's a jump (more than 1 step)
+    
+    // Check if jumping to target cell
+    if (isTargetCell && newRow === targetRow && newCol === targetCol) {
+      // Allow jump to target only if target is adjacent (1 step away)
+      // Calculate Manhattan distance to target
+      const targetDistance = Math.abs(targetRow - startRow) + Math.abs(targetCol - startCol);
+      
+      // If target is adjacent (distance <= 2), allow the jump
+      if (targetDistance <= 2) {
+        // For jumps to target: must be in same row OR same column
+        if (dx !== 0 && dy !== 0) {
+          return false; // Diagonal jumps not allowed even to adjacent target
+        }
+        
+        // Check if any X in between for jumps to target
+        if (hasCrossInBetween(startRow, startCol, newRow, newCol)) {
+          return false;
+        }
+        
+        return true;
+      } else {
+        return false; // Target not adjacent, can't jump directly
+      }
+    }
+    
+    // For non-target jumps: must be in same row OR same column
+    if (dx !== 0 && dy !== 0) {
+      return false; // Diagonal jumps not allowed
+    }
+    
+    // Check if any X in between for jumps
+    if (hasCrossInBetween(startRow, startCol, newRow, newCol)) {
+      return false;
+    }
+    
+    return true;
+  }
+}
   function parseInstruction(code){
     const regex1 = /\*\s*\(\s*\*\s*\(\s*ptr\s*([+-])\s*(\d+)\s*\)\s*([+-])\s*(\d+)\s*\)/;
     const m1 = code.match(regex1);
@@ -818,31 +925,68 @@
   }
 
   function queueMove(){
-    if(!gameActive) return;
-    
-    const code=document.getElementById('codeInput').value.trim();
-    const inst=parseInstruction(code);
-    
-    if(!inst){
-      showInfo('❌ Invalid pointer expression. Use: *(*(ptr+dx)+dy) or ptr[dx][dy]', 'error');
-      return;
-    }
-    
-    instructionQueue.push({
-      dx: inst.dx,
-      dy: inst.dy,
-      expression: code
-    });
-    
-    const absRow = baseRow + inst.dx;
-    const absCol = baseCol + inst.dy;
-    showInfo(`✔ Queued: ${code} → arr[${absRow}][${absCol}] (relative to base)`, 'success');
-    renderGrid();
+  if(!gameActive) return;
+  
+  const code=document.getElementById('codeInput').value.trim();
+  const inst=parseInstruction(code);
+  
+  if(!inst){
+    showInfo('❌ Invalid pointer expression. Use: *(*(ptr+dx)+dy) or ptr[dx][dy]', 'error');
+    return;
   }
+  
+  // Calculate absolute target position (relative to base)
+  const absTargetRow = baseRow + inst.dx;
+  const absTargetCol = baseCol + inst.dy;
+  
+  // Calculate cumulative position from all queued instructions
+  let cumulativeRow = baseRow;
+  let cumulativeCol = baseCol;
+  
+  for (const queuedInst of instructionQueue) {
+    cumulativeRow += queuedInst.dx;
+    cumulativeCol += queuedInst.dy;
+  }
+  
+  // Calculate relative move from cumulative position to absolute target
+  const relDx = absTargetRow - cumulativeRow;
+  const relDy = absTargetCol - cumulativeCol;
+  
+  // Check if this is a move to the actual target cell
+  const isMovingToTarget = (absTargetRow === targetRow && absTargetCol === targetCol);
+  
+  // Check if move is valid from cumulative position to absolute target
+  if (!isValidMoveFrom(cumulativeRow, cumulativeCol, relDx, relDy, isMovingToTarget)) {
+    const isOneStepMove = Math.abs(relDx) <= 1 && Math.abs(relDy) <= 1;
+    
+    if (!isOneStepMove && relDx !== 0 && relDy !== 0) {
+      showInfo(`❌ Cannot jump diagonally! Jumps allowed only in same row or column.`, 'error');
+    } else if (isMovingToTarget && Math.abs(relDx) + Math.abs(relDy) > 2) {
+      showInfo(`❌ Cannot jump directly to target! Target must be adjacent (1 step away).`, 'error');
+    } else if (!isOneStepMove && hasCrossInBetween(cumulativeRow, cumulativeCol, absTargetRow, absTargetCol)) {
+      showInfo(`❌ Cannot jump! There's an X cell in the path.`, 'error');
+    } else {
+      showInfo(`❌ Cannot move to arr[${absTargetRow}][${absTargetCol}]: Invalid position!`, 'error');
+    }
+    return;
+  }
+  
+  instructionQueue.push({
+    dx: inst.dx,
+    dy: inst.dy,
+    expression: code
+  });
+  
+  const isOneStepMove = Math.abs(relDx) <= 1 && Math.abs(relDy) <= 1;
+  const moveType = isOneStepMove ? '🏃 Move' : '🦘 Jump';
+  const targetNote = isMovingToTarget ? ' (Target!)' : '';
+  showInfo(`✔ Queued: ${code} → arr[${absTargetRow}][${absTargetCol}] (${moveType}${targetNote})`, 'success');
+  renderGrid();
+}
 
   function clearQueue() {
     instructionQueue = [];
-    showInfo('Queue cleared', 'warning');
+    showInfo('Queue cleared. All moves will be relative to base address.', 'warning');
     renderGrid();
   }
 
@@ -851,64 +995,7 @@
     document.getElementById('codeInput').focus();
   }
 
-  async function executeQueue(){
-    if(!gameActive || executing) return;
-    executing = true;
-    setButtonLoading(executeBtn, true);
-    showInfo('Executing program...', 'warning');
-
-    currentRow = baseRow;
-    currentCol = baseCol;
-    renderGrid();
-    await sleep(500);
-
-    for(let index = 0; index < instructionQueue.length; index++) {
-      if(!gameActive) break;
-      
-      const inst = instructionQueue[index];
-      const newRow = baseRow + inst.dx;
-      const newCol = baseCol + inst.dy;
-      
-      moveCount++;
-      await animateDirectMove(newRow, newCol);
-      
-      if(!isValidPosition(newRow, newCol)){
-        faultCount++;
-        score += FAULT_PENALTY;
-        showInfo(`💥 Segmentation Fault! -${Math.abs(FAULT_PENALTY)} points`, 'error');
-        instructionQueue = [];
-        renderGrid();
-        break;
-      }
-      
-      currentRow = newRow;
-      currentCol = newCol;
-      successCount++;
-      
-      if(currentRow === targetRow && currentCol === targetCol){
-        targetsReached++;
-        score += TARGET_POINTS;
-        baseRow = currentRow;
-        baseCol = currentCol;
-        showInfo(`🎯 Target reached! +${TARGET_POINTS} points. Base address updated to cell ${baseRow*SIZE+baseCol}`, 'success');
-        generateTarget();
-      } else {
-        showInfo(`✓ Moved to arr[${currentRow}][${currentCol}] (from base +(${inst.dx},${inst.dy}))`, 'success');
-      }
-      
-      renderGrid();
-      await sleep(800);
-    }
-    
-    executing = false;
-    setButtonLoading(executeBtn, false);
-    if(instructionQueue.length > 0) {
-      showInfo('Program execution complete', 'success');
-    }
-    instructionQueue = [];
-    renderGrid();
-  }
-
+  
   async function animateDirectMove(newRow, newCol) {
     const cellIndex = newRow * SIZE + newCol;
     const cells = gridEl.querySelectorAll('.cell');
@@ -917,12 +1004,6 @@
       await sleep(600);
       cells[cellIndex].classList.remove('direct-move');
     }
-  }
-
-  function isValidPosition(row, col){
-    if(row < 0 || row >= SIZE || col < 0 || col >= SIZE) return false;
-    if(isCross(row, col)) return false;
-    return true;
   }
 
   function generateTarget(){
@@ -1088,9 +1169,90 @@
     startGameTimer();
     
     document.getElementById('codeInput').focus();
-    showInfo(`Welcome ${playerName}! Base address starts at cell 0. Reach targets to move the base address.`);
+    showInfo(`Welcome ${playerName}! Moves checked from current position, coordinates shown relative to base.`);
   }
+async function executeQueue(){
+  if(!gameActive || executing) return;
+  executing = true;
+  setButtonLoading(executeBtn, true);
+  showInfo('Executing program...', 'warning');
 
+  // Reset to base position before executing queue
+  currentRow = baseRow;
+  currentCol = baseCol;
+  renderGrid();
+  await sleep(500);
+
+  for(let index = 0; index < instructionQueue.length; index++) {
+    if(!gameActive) break;
+    
+    const inst = instructionQueue[index];
+    // Calculate absolute target position (relative to base)
+    const targetRowFromBase = baseRow + inst.dx;
+    const targetColFromBase = baseCol + inst.dy;
+    
+    // Calculate relative move from current position to absolute target
+    const relDx = targetRowFromBase - currentRow;
+    const relDy = targetColFromBase - currentCol;
+    
+    moveCount++;
+    await animateDirectMove(targetRowFromBase, targetColFromBase);
+    
+    // Check if this is a move to the actual target cell
+    const isMovingToTarget = (targetRowFromBase === targetRow && targetColFromBase === targetCol);
+    
+    // Check if move is valid from current position to absolute target
+    if(!isValidMoveFrom(currentRow, currentCol, relDx, relDy, isMovingToTarget)){
+      faultCount++;
+      score += FAULT_PENALTY;
+      
+      const isOneStepMove = Math.abs(relDx) <= 1 && Math.abs(relDy) <= 1;
+      
+      if (!isOneStepMove && relDx !== 0 && relDy !== 0) {
+        showInfo(`💥 Segmentation Fault! Cannot jump diagonally -${Math.abs(FAULT_PENALTY)} points`, 'error');
+      } else if (isMovingToTarget && Math.abs(relDx) + Math.abs(relDy) > 2) {
+        showInfo(`💥 Segmentation Fault! Cannot jump directly to distant target -${Math.abs(FAULT_PENALTY)} points`, 'error');
+      } else if (!isOneStepMove && hasCrossInBetween(currentRow, currentCol, targetRowFromBase, targetColFromBase)) {
+        showInfo(`💥 Segmentation Fault! X in path -${Math.abs(FAULT_PENALTY)} points`, 'error');
+      } else {
+        showInfo(`💥 Segmentation Fault! Invalid position -${Math.abs(FAULT_PENALTY)} points`, 'error');
+      }
+      
+      instructionQueue = [];
+      renderGrid();
+      break;
+    }
+    
+    // Update current position to absolute target
+    currentRow = targetRowFromBase;
+    currentCol = targetColFromBase;
+    successCount++;
+    
+    if(currentRow === targetRow && currentCol === targetCol){
+      targetsReached++;
+      score += TARGET_POINTS;
+      baseRow = currentRow;
+      baseCol = currentCol;
+      showInfo(`🎯 Target reached! +${TARGET_POINTS} points. Base address updated to cell ${baseRow*SIZE+baseCol}`, 'success');
+      generateTarget();
+    } else {
+      const isOneStepMove = Math.abs(relDx) <= 1 && Math.abs(relDy) <= 1;
+      const moveType = isOneStepMove ? 'moved' : 'jumped';
+      showInfo(`✓ ${moveType} to arr[${currentRow}][${currentCol}]`, 'success');
+    }
+    
+    renderGrid();
+    await sleep(800);
+  }
+  
+  executing = false;
+  setButtonLoading(executeBtn, false);
+  if(instructionQueue.length > 0) {
+    showInfo('Program execution complete', 'success');
+  }
+  instructionQueue = [];
+  renderGrid();
+}
   // Add keyboard shortcuts
   document.addEventListener('keydown', function(e) {
     if (e.ctrlKey && e.key === 'Enter') {
