@@ -7,7 +7,9 @@ import dotnenv from 'dotenv';
 dotnenv.config();
 const app = express();
 app.use(express.json());
-app.use(cors());
+app.use(cors({
+    origin: process.env.ALLOWED_ORIGIN || '*'
+}));
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -137,7 +139,7 @@ app.get("/leaderboard", async (req, res) => {
         
         // Set proper headers
         res.setHeader('Content-Type', 'application/json');
-        res.setHeader('Access-Control-Allow-Origin', 'http://localhost:3000');
+        res.setHeader('Access-Control-Allow-Origin', process.env.ALLOWED_ORIGIN || '*');
         
         res.json(participants);
         
